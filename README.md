@@ -1,57 +1,96 @@
-# Sample Hardhat 3 Beta Project (`mocha` and `ethers`)
+# ☕ Public Café: Decentralized Donation Platform
 
-This project showcases a Hardhat 3 Beta project using `mocha` for tests and the `ethers` library for Ethereum interactions.
+A full-stack Web3 application designed to empower communities through transparent fundraising. This project features a robust multi-signature governance model, automated safety rails, and a role-based user interface.
 
-To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+---
 
-## Project Overview
+## 📂 Project Structure
 
-This example project includes:
+- **/backend**: Smart contracts built with Solidity and Hardhat. Manages the 2-of-3 multi-sig voting logic and safe fund storage.
+- **/frontend**: A responsive React dashboard built with Mantine UI and Ethers.js for donors, managers, and signers.
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using `mocha` and ethers.js
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
+---
 
-## Usage
+## 🛡️ Smart Contract Governance & Safety
 
-### Running Tests
+The core contract is engineered with three specific security layers to ensure community trust:
 
-To run all the tests in the project, execute the following command:
+1. **Multi-Sig Consensus (2-of-3)**: Withdrawals must be proposed by the **Manager** and approved by at least **2 out of 3** authorized board members (Signers).
+2. **The 1 ETH Reserve Rule**: The contract enforces a permanent safety net by automatically reverting any withdrawal that would leave the café's balance below **1 ETH**.
+3. **3-Day Withdrawal Cooldown**: To prevent rapid depletion of funds, a **72-hour wait period** is enforced between successful withdrawals.
+4. **On-Chain Transparency**: Every donation, proposal, and vote is recorded on the blockchain for 100% public auditability.
 
-```shell
-npx hardhat test
-```
+---
 
-You can also selectively run the Solidity or `mocha` tests:
+## 🛠️ Tech Stack
 
-```shell
-npx hardhat test solidity
-npx hardhat test mocha
-```
+- **Contracts**: Solidity ^0.8.24, Hardhat Ignition
+- **Frontend**: React (Vite), TypeScript, Mantine UI v7
+- **Library**: Ethers.js v6
+- **Icons**: Tabler Icons
 
-### Make a deployment to Sepolia
+---
 
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
+## 🚀 Getting Started (Local Testing)
 
-To run the deployment to a local chain:
+### 1. Setup Backend
 
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
-```
+1. Navigate to the backend folder: `cd backend`
+2. Install dependencies: `npm install`
+3. Create a `.env` file:
+   ```env
+   PRIVATE_KEY=your_private_key_here
+   ALCHEMY_API_KEY=your_alchemy_key_here
+   ```
+4. compile the contract
+   ```bash
+      npx hardhat compile
+   ```
+5. Run the local node:
+   ```bash
+      npx hardhat node
+   ```
+6. Deploy the contract
+   ```bash
+      npx hardhat ignition deploy ./ignition/modules/PublicCafeDonation.ts --network localhost
+   ```
+7. Setup Frontend
 
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
+   1. Navigate to the frontend folder: cd frontend
+   2. Install dependencies: npm install
+   3. Update the CONTRACT_ADDRESS in src/contract/config.ts with the address from the deployment step.
+      Start the application: npm run dev
 
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
+x# ☕ Public Café: Decentralized Donation Platform
 
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
+A full-stack Web3 application designed to empower communities through transparent fundraising. This project features a robust multi-signature governance model, automated safety rails, and a role-based user interface.
 
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
-```
+---
 
-After setting the variable, you can run the deployment with the Sepolia network:
+## 📂 Project Structure
 
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
-```
+- **/backend**: Smart contracts built with Solidity and Hardhat.
+- **/frontend**: React dashboard built with Mantine UI and Ethers.js.
+
+---
+
+## 🛡️ Smart Contract Governance & Safety
+
+1. **Multi-Sig Consensus (2-of-3)**: Withdrawals must be proposed by the **Manager** and approved by at least **2 out of 3** authorized board members.
+2. **The 1 ETH Reserve Rule**: Reverts any withdrawal that leaves the balance below **1 ETH**.
+3. **3-Day Withdrawal Cooldown**: Enforces a **72-hour wait period** between successful withdrawals.
+
+---
+
+## 🔗 Connecting Frontend & Backend (The ABI)
+
+For the frontend to communicate with the smart contract, you must sync the **ABI**:
+
+1. **Compile the Backend**: In the `/backend` folder, run `npx hardhat compile`.
+2. **Locate the ABI**: Find the compiled JSON file at:  
+   `backend/artifacts/contracts/PublicCafeDonation.sol/PublicCafeDonation.json`
+3. **Sync to Frontend**: Copy the `abi` array from that JSON file and paste it into:  
+   `frontend/src/contract/abi.ts`
+   ```typescript
+   export const abi = [...] // Paste the array here
+   ```

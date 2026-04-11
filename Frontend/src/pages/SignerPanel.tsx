@@ -25,7 +25,8 @@ export default function SignerPanel() {
           recipient: r[1], 
           reason: r[2], 
           approvals: r[3].toString(), 
-          executed: r[4] 
+          executed: r[4],
+          receipt: r[5] 
         });
       }
       setRequests(items.reverse());
@@ -93,6 +94,7 @@ export default function SignerPanel() {
               <Table.Th>Amount</Table.Th>
               <Table.Th>Status</Table.Th>
               <Table.Th>Actions</Table.Th>
+              <Table.Th>Receipt</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -121,6 +123,23 @@ export default function SignerPanel() {
                     )
                   )}
                 </Table.Td>
+                <Table.Td>
+  {req.receipt ? (
+    <a href={req.receipt} target="_blank" rel="noopener noreferrer">
+      <Button size="xs" variant="light">
+        View Receipt
+      </Button>
+    </a>
+  ) : req.executed ? (
+    <Text size="xs" c="orange">
+      Waiting for receipt
+    </Text>
+  ) : (
+    <Text size="xs" c="dimmed">
+      Not available
+    </Text>
+  )}
+</Table.Td>
               </Table.Tr>
             ))}
           </Table.Tbody>

@@ -20,4 +20,4 @@
 # Hardhat coverage reports
 /coverage
 
-/ignition
+ignition/deployments/

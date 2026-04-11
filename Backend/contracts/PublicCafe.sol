@@ -11,10 +11,15 @@ contract PublicCafeDonation {
     uint256 public constant WITHDRAW_COOLDOWN = 3 days;
     uint256 public constant MIN_RESERVE = 1 ether;
 
+    // 🧾 Accounting Lock State
+    bool public needsReceipt; // Global lock: true if a withdrawal happened but no receipt was provided
+    uint256 public pendingReceiptRequestId; // ID of the request that is missing a receipt
+
     struct WithdrawalRequest {
         uint256 amount;
         address payable recipient;
         string reason;
+        string receiptHash; // 👈 Stores the IPFS hash or URL of the receipt
         uint256 approvalCount;
         bool executed;
         mapping(address => bool) hasApproved;
@@ -27,6 +32,7 @@ contract PublicCafeDonation {
     event RequestCreated(uint256 id, uint256 amount, string reason);
     event RequestApproved(uint256 id, address signer);
     event RequestExecuted(uint256 id, uint256 amount);
+    event ReceiptUploaded(uint256 id, string receiptHash); // New event
 
     modifier onlySigner() {
         bool isSigner = false;
@@ -51,9 +57,6 @@ contract PublicCafeDonation {
         emit DonationReceived(msg.sender, msg.value);
     }
 
-    // 1. Create a Request (Replaces simple withdraw)
-    // Add this modifier or update the function
-    // Helper to check if someone is the Manager (Owner) or a Signer
     function isAuthorizedToPropose(address _addr) public view returns (bool) {
         if (_addr == owner) return true;
         for (uint i = 0; i < signers.length; i++) {
@@ -62,13 +65,17 @@ contract PublicCafeDonation {
         return false;
     }
 
-    // 1. Create a Request (Allows Manager OR Signers)
+    // 1. Create a Request (Checks if a receipt is pending first)
     function createRequest(uint256 _amount, string memory _reason) public {
         require(isAuthorizedToPropose(msg.sender), "Not authorized to propose");
+        require(
+            !needsReceipt,
+            "Accounting Lock: Upload receipt for previous withdrawal first"
+        );
 
         WithdrawalRequest storage r = requests[requestCount++];
         r.amount = _amount;
-        r.recipient = payable(msg.sender); // The person proposing gets the funds if approved
+        r.recipient = payable(msg.sender);
         r.reason = _reason;
         r.executed = false;
         r.approvalCount = 0;
@@ -76,7 +83,19 @@ contract PublicCafeDonation {
         emit RequestCreated(requestCount - 1, _amount, _reason);
     }
 
-    // 2. Approve and Auto-Execute if rules met
+    // 2. New function: Manager uploads receipt to unlock the contract
+    function uploadReceipt(uint256 _id, string memory _receiptHash) public {
+        require(msg.sender == owner, "Only Manager can upload receipts");
+        require(needsReceipt, "No receipt pending");
+        require(_id == pendingReceiptRequestId, "Wrong request ID");
+        require(bytes(_receiptHash).length > 0, "Empty hash");
+
+        requests[_id].receiptHash = _receiptHash;
+        needsReceipt = false; // 🔓 UNLOCK: Manager can now create new requests
+
+        emit ReceiptUploaded(_id, _receiptHash);
+    }
+
     function approveRequest(uint256 _id) public onlySigner {
         WithdrawalRequest storage r = requests[_id];
         require(!r.executed, "Already executed");
@@ -87,7 +106,6 @@ contract PublicCafeDonation {
 
         emit RequestApproved(_id, msg.sender);
 
-        // If we reach 2 approvals, check the Cafe Rules before sending
         if (r.approvalCount >= REQUIRED_APPROVALS) {
             executeWithdrawal(_id);
         }
@@ -96,13 +114,10 @@ contract PublicCafeDonation {
     function executeWithdrawal(uint256 _id) internal {
         WithdrawalRequest storage r = requests[_id];
 
-        // RULE 1: Cooldown
         require(
             block.timestamp >= lastWithdrawalTime + WITHDRAW_COOLDOWN,
             "Cooldown active"
         );
-
-        // RULE 2: 1 ETH Reserve
         require(
             address(this).balance >= r.amount + MIN_RESERVE,
             "Reserve rule: Must leave 1 ETH"
@@ -110,12 +125,16 @@ contract PublicCafeDonation {
 
         r.executed = true;
         lastWithdrawalTime = block.timestamp;
-        r.recipient.transfer(r.amount);
 
+        // 🔒 LOCK: Activate the accounting lock
+        needsReceipt = true;
+        pendingReceiptRequestId = _id;
+
+        r.recipient.transfer(r.amount);
         emit RequestExecuted(_id, r.amount);
     }
 
-    // Helper for Frontend to read request data
+    // Updated helper to return receiptHash
     function getRequest(
         uint256 _id
     )
@@ -126,20 +145,25 @@ contract PublicCafeDonation {
             address recipient,
             string memory reason,
             uint256 approvals,
-            bool executed
+            bool executed,
+            string memory receiptHash // 👈 Added to return
         )
     {
         WithdrawalRequest storage r = requests[_id];
-        return (r.amount, r.recipient, r.reason, r.approvalCount, r.executed);
+        return (
+            r.amount,
+            r.recipient,
+            r.reason,
+            r.approvalCount,
+            r.executed,
+            r.receiptHash
+        );
     }
 
-    // Add this to your existing contract
     function denyRequest(uint256 _id) public onlySigner {
         WithdrawalRequest storage r = requests[_id];
         require(!r.executed, "Already executed");
-
-        r.executed = true; // Mark as "executed" so it can't be approved anymore
-        // We don't transfer money; we just close the request
+        r.executed = true;
     }
 
     function getContractBalance() public view returns (uint256) {

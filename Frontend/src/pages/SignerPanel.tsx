@@ -124,13 +124,13 @@ export default function SignerPanel() {
                   )}
                 </Table.Td>
                 <Table.Td>
-  {req.receipt ? (
-    <a href={req.receipt} target="_blank" rel="noopener noreferrer">
-      <Button size="xs" variant="light">
-        View Receipt
-      </Button>
-    </a>
-  ) : req.executed ? (
+             {req.receipt ? (
+             <a href={req.receipt} target="_blank" rel="noopener noreferrer">
+             <Button size="xs" variant="light">
+               View Receipt
+             </Button>
+           </a>
+      ) : req.executed ? (
     <Text size="xs" c="orange">
       Waiting for receipt
     </Text>

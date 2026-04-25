@@ -9,7 +9,7 @@ contract PublicCafeDonation {
     // 🛡️ Existing Rules
     uint256 public lastWithdrawalTime;
     uint256 public constant WITHDRAW_COOLDOWN = 3 days;
-    uint256 public constant MIN_RESERVE = 1 ether;
+    uint256 public constant MIN_RESERVE = 0.0005 ether;
 
     // 🧾 Accounting Lock State
     bool public needsReceipt; // Global lock: true if a withdrawal happened but no receipt was provided

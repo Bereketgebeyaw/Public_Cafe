@@ -3,8 +3,8 @@ import { ethers } from "ethers";
 import { abi } from "../contract/abi";
 import { CONTRACT_ADDRESS } from "../contract/config";
 import { useWallet } from "../hooks/useWallet";
-import { notifications } from "@mantine/notifications"; // ✅ Beautiful notifications
-import { IconHeart, IconCheck, IconX } from "@tabler/icons-react"; // ✅ Icons
+import { notifications } from "@mantine/notifications"; 
+import { IconHeart, IconCheck, IconX , IconCoffee} from "@tabler/icons-react"; 
 
 import {
   Container,
@@ -16,9 +16,12 @@ import {
   Stack,
   Group,
   Box,
-  Divider,
-  Badge
+  Badge,
+  Image,
+  SimpleGrid, 
+  ThemeIcon
 } from "@mantine/core";
+
 
 export default function Donate() {
   const { account, connectWallet } = useWallet();
@@ -49,7 +52,7 @@ export default function Donate() {
 
     setLoading(true);
 
-    // 1. Create a notification ID to update it later
+    
     const notificationId = "donation-tx";
 
     notifications.show({
@@ -81,7 +84,7 @@ export default function Donate() {
 
       await tx.wait();
 
-      // 3. Final success state
+      
       notifications.update({
         id: notificationId,
         color: "teal",
@@ -96,7 +99,7 @@ export default function Donate() {
     } catch (error: any) {
       console.error(error);
       
-      // 4. Update to error state
+     
       notifications.update({
         id: notificationId,
         color: "red",
@@ -113,34 +116,44 @@ export default function Donate() {
 
   return (
     <Box>
-      {/* 🔝 NAVBAR */}
-      <Box
-        px="md"
-        py="sm"
-        style={{
-          borderBottom: "1px solid #eee",
-          position: "sticky",
-          top: 0,
-          background: "white",
-          zIndex: 10,
-        }}
-      >
-        <Group justify="space-between">
-          <Title order={3}>☕ Public Café</Title>
+    
+<Box
+  px="md"
+  py="sm"
+  style={{
+    borderBottom: "1px solid #eee",
+    position: "sticky",
+    top: 0,
+    background: "white",
+    zIndex: 10,
+  }}
+>
+  <Group justify="space-between">
+    
+    <Group gap="xs">
+      <Image 
+        src="/publicCafelogo.png" 
+        alt="Public Café Logo" 
+        h={100} 
+        w="auto" 
+      />
+      <Title order={3}>Public Café</Title>
+    </Group>
 
-          {!account ? (
-            <Button size="sm" onClick={connectWallet}>
-              Connect Wallet
-            </Button>
-          ) : (
-            <Badge color="blue" size="lg" variant="light">
-              {account.slice(0, 6)}...{account.slice(-4)}
-            </Badge>
-          )}
-        </Group>
-      </Box>
+    {!account ? (
+      <Button size="sm" onClick={connectWallet}>
+        Connect Wallet
+      </Button>
+    ) : (
+      <Badge color="blue" size="lg" variant="light">
+        {account.slice(0, 6)}...{account.slice(-4)}
+      </Badge>
+    )}
+  </Group>
+</Box>
 
-      {/* 🌟 HERO SECTION */}
+
+    
       <Container size="md" py={80}>
         <Stack align="center" gap="md">
           <Title order={1} ta="center">
@@ -195,78 +208,83 @@ export default function Donate() {
       </Container>
 
       {/* ❤️ WHY IT MATTERS */}
-      <Container size="md" py={60}>
-        <Stack align="center">
-          <Title order={2}>Why it matters</Title>
+     <Container size="md" py={100}>
+        <Stack gap={80}>
+          
+          {/* Why It Matters & Mission in a Grid */}
+          <SimpleGrid cols={{ base: 1, md: 2 }} spacing={40}>
+            <Card padding="xl" radius="lg" withBorder style={{ background: 'rgba(255, 255, 255, 0.5)' }}>
+              <ThemeIcon variant="light" size={50} radius="md" color="red" mb="md">
+                <IconHeart size={30} />
+              </ThemeIcon>
+              <Title order={2} mb="sm">Why it matters</Title>
+              <Text c="dimmed" lh={1.6}>
+                There are people around us who go unseen. Not because they lack potential, 
+                but because they lack opportunity. Your donation provides a warm space 
+                and a new beginning.
+              </Text>
+            </Card>
 
-          <Text ta="center" c="dimmed">
-            There are people around us who go unseen and unsupported.
-            Not because they lack potential — but because they lack opportunity.
-          </Text>
+            <Card padding="xl" radius="lg" withBorder>
+              <ThemeIcon variant="light" size={50} radius="md" color="orange" mb="md">
+                <IconCoffee size={30} />
+              </ThemeIcon>
+              <Title order={2} mb="sm">Our Mission</Title>
+              <Text c="dimmed" lh={1.6}>
+                To create spaces where anyone can sit, think, work, and feel human again. 
+                A cup of coffee. A connection to the world. A moment of peace.
+              </Text>
+            </Card>
+          </SimpleGrid>
 
-          <Text ta="center">
-            One donation can provide a warm space, a connection, and a new beginning.
-          </Text>
-        </Stack>
-      </Container>
+          {/* Trust Banner */}
+          <Card radius="lg" p={40} bg="blue.0" style={{ border: '1px dashed var(--mantine-color-blue-4)' }}>
+            <Group justify="space-between" align="center">
+              <Stack gap={4}>
+                <Title order={2} c="blue.9">Built on Trust</Title>
+                <Text size="lg" c="blue.7">
+                  Every transaction is transparent and verifiable on the blockchain.
+                </Text>
+              </Stack>
+              <Badge size="xl" variant="filled" color="blue" py={20}>
+                No Middlemen. Direct Impact.
+              </Badge>
+            </Group>
+          </Card>
 
-      <Divider />
+          {/* Final CTA Section */}
+          <Stack align="center" py={40} gap="xl">
+            <Box style={{ textAlign: 'center' }}>
+              <Title order={1} size={42} fw={900}>Start with one small act</Title>
+              <Text c="dimmed" size="xl" mt="md">
+                Connect your wallet. Make a contribution. Change a life.
+              </Text>
+            </Box>
 
-      {/* ☕ MISSION */}
-      <Container size="md" py={60}>
-        <Stack align="center">
-          <Title order={2}>Our Mission</Title>
-
-          <Text ta="center" c="dimmed">
-            To create spaces where anyone can sit, think, work, and feel human again.
-          </Text>
-
-          <Text ta="center">
-            A cup of coffee. A connection to the world. A moment of peace.
-          </Text>
-        </Stack>
-      </Container>
-
-      <Divider />
-
-      {/* 🔐 TRUST */}
-      <Container size="md" py={60}>
-        <Stack align="center">
-          <Title order={2}>Built on Trust</Title>
-
-          <Text ta="center" c="dimmed">
-            Every transaction is transparent and verifiable on the blockchain.
-          </Text>
-
-          <Text ta="center">
-            No middlemen. Just direct impact.
-          </Text>
-        </Stack>
-      </Container>
-
-      {/* 🚀 CTA */}
-      <Container size="md" py={80}>
-        <Stack align="center">
-          <Title order={2}>Start with one small act</Title>
-
-          <Text ta="center" c="dimmed">
-            Connect your wallet. Make a contribution. Change a life.
-          </Text>
-
-          {!account && (
-            <Button size="md" onClick={connectWallet}>
-              Connect Wallet
-            </Button>
-          )}
+            {!account && (
+              <Button size="xl" radius="xl" onClick={connectWallet} px={40} 
+                style={{ boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}>
+                Connect Wallet
+              </Button>
+            )}
+          </Stack>
         </Stack>
       </Container>
 
       {/* 🔻 FOOTER */}
-      <Box py="lg" style={{ borderTop: "1px solid #eee" }}>
-        <Text ta="center" size="sm" c="dimmed">
-          © {new Date().getFullYear()} Public Café — Powered by community
-        </Text>
-      </Box>
+      <Box py="xl" mt={100} style={{ borderTop: "1px solid #eee", background: '#f9f9f9' }}>
+        <Container size="md">
+          <Group justify="space-between">
+            <Group gap="xs">
+              <Image src="/publicCafelogo.png" h={30} w="auto" style={{ filter: 'grayscale(1)' }} />
+              <Text fw={700} c="dimmed">Public Café</Text>
+            </Group>
+            <Text ta="center" size="sm" c="dimmed">
+              © {new Date().getFullYear()} — Powered by community
+            </Text>
+          </Group>
+        </Container>
     </Box>
+    </Box> 
   );
 }

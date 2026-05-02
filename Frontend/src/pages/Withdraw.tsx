@@ -4,10 +4,10 @@ import { abi } from "../contract/abi";
 import { CONTRACT_ADDRESS } from "../contract/config";
 import { useWallet } from "../hooks/useWallet";
 import { notifications } from "@mantine/notifications"; 
-import { PinataSDK } from "pinata";
+
 import { 
   IconX, IconUsers, IconPlus, IconLock, IconGavel, 
-  IconReceipt, IconExternalLink, IconCheck 
+  IconReceipt, IconExternalLink, 
 } from "@tabler/icons-react"; 
 
 import {

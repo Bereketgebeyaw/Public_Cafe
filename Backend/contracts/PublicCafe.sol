@@ -120,7 +120,7 @@ contract PublicCafeDonation {
         );
         require(
             address(this).balance >= r.amount + MIN_RESERVE,
-            "Reserve rule: Must leave 1 ETH"
+            "Reserve rule: Must leave 0.0005 ETH"
         );
 
         r.executed = true;
